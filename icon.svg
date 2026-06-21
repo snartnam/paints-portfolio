@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="112" fill="#534AB7"/>
+  <!-- Paint palette body -->
+  <ellipse cx="256" cy="270" rx="155" ry="130" fill="#fff" opacity="0.95"/>
+  <!-- Thumb hole -->
+  <circle cx="310" cy="320" r="32" fill="#534AB7"/>
+  <!-- Paint dots -->
+  <circle cx="160" cy="240" r="26" fill="#80CBC4"/>
+  <circle cx="220" cy="190" r="26" fill="#F06292"/>
+  <circle cx="295" cy="175" r="26" fill="#FFD54F"/>
+  <circle cx="360" cy="205" r="26" fill="#81C784"/>
+  <circle cx="390" cy="270" r="26" fill="#FF8A65"/>
+  <!-- Chart bars at bottom -->
+  <rect x="110" y="340" width="30" height="60" rx="6" fill="#fff" opacity="0.5"/>
+  <rect x="152" y="315" width="30" height="85" rx="6" fill="#fff" opacity="0.5"/>
+  <rect x="194" y="295" width="30" height="105" rx="6" fill="#fff" opacity="0.65"/>
+  <!-- P letter -->
+  <text x="256" y="145" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="90" font-weight="800" fill="#fff" opacity="0.9">₿</text>
+</svg>
