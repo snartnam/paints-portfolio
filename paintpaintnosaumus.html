@@ -541,6 +541,9 @@
 
     /* Greeting */
     .home-greeting{margin-bottom:1.5rem;}
+    .home-greeting-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+    .home-askai-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;background:#fff;border:1.5px solid var(--border);border-radius:24px;font-size:13px;font-weight:700;color:#534AB7;text-decoration:none;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.06);transition:box-shadow .15s,border-color .15s;}
+    .home-askai-btn:hover{border-color:#534AB7;box-shadow:0 2px 10px rgba(83,74,183,.15);}
     .home-hello{font-size:34px;font-weight:800;color:var(--text-primary);line-height:1.15;letter-spacing:-.02em;}
     .home-sub{font-size:16px;font-weight:500;color:var(--text-secondary);margin-top:6px;}
     .home-market-row{display:flex;align-items:center;gap:10px;margin-top:10px;}
@@ -774,8 +777,16 @@
     <div class="home-screen">
       <div class="home-deco"></div>
       <div class="home-greeting">
-        <div class="home-hello" id="homeHello">Hello Paint,</div>
-        <div class="home-sub" id="homeSub">How's your day going?</div>
+        <div class="home-greeting-row">
+          <div>
+            <div class="home-hello" id="homeHello">Hello Paint,</div>
+            <div class="home-sub" id="homeSub">How's your day going?</div>
+          </div>
+          <a class="home-askai-btn" href="https://claude.ai" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 8v4l3 3"/><path d="M18 2v6h6"/></svg>
+            Ask AI
+          </a>
+        </div>
         <div class="home-market-row">
           <span class="smc-badge closed" id="sidebarMarketBadge"><span class="market-badge-dot"></span>Market Closed</span>
           <span class="home-time" id="sidebarDatetime"></span>
@@ -1533,21 +1544,25 @@ function renderHome() {
   }
 
   // Latest 4 news items
-  const todayStr = new Date().toLocaleDateString('sv', { timeZone:'Asia/Bangkok' });
   const items = [...NEWS_DATA].sort((a,b) => b.date.localeCompare(a.date)).slice(0, 4);
   const emojis = ['📈','📊','💹','📉'];
-  document.getElementById('homeNewsList').innerHTML = items.map((n,i) => `
+  document.getElementById('homeNewsList').innerHTML = items.map((n,i) => {
+    const [,mm,dd] = n.date.split('-');
+    const dateLabel = new Date(n.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const sourceName = n.source.split('·')[0].trim();
+    return `
     <a class="home-news-card" href="${n.url}" target="_blank" rel="noopener">
       <div class="hnc-img">${emojis[i % emojis.length]}</div>
       <div class="hnc-body">
         <div class="hnc-ticker">${n.ticker}</div>
         <div class="hnc-text">${n.text}</div>
         <div class="hnc-source">
-          <span class="hnc-source-dot">${n.source.charAt(0)}</span>
-          ${n.source} · ${n.date === todayStr ? 'Today' : n.date}
+          <span class="hnc-source-dot">${sourceName.charAt(0)}</span>
+          ${sourceName} · ${dateLabel}
         </div>
       </div>
-    </a>`).join('');
+    </a>`;
+  }).join('');
 }
 
 function showTab(name, btn) {
