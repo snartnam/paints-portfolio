@@ -16,7 +16,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <style>
     :root {
-      --bg:#faf9fc; --surface:#f3f1f8; --card:#ffffff;
+      --bg:#FAF8F4; --surface:#F2EFE9; --card:#FFFDF9;
       --text-primary:#1a1a2e; --text-secondary:#6b6b80; --border:rgba(0,0,0,0.06);
       --purple-bg:#EEEDFE; --purple-dark:#3C3489; --purple-text:#534AB7;
       --teal-bg:#E1F5EE;   --teal-dark:#085041;  --teal-text:#0F6E56;
@@ -40,11 +40,31 @@
       --up:#5DCAA5; --down:#F0997B;
     }}
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    html,body{margin:0;padding:0;}
     body{background:var(--bg);color:var(--text-primary);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;}
-    .wrap{width:100%;padding:1.5rem 1.5rem 4rem;}
+    .wrap{width:100%;padding:0 1.5rem 4rem;}
 
     /* ── App header ── */
-    .app-header{display:flex;align-items:center;padding:14px 0 16px;border-bottom:1px solid var(--border);margin-bottom:1.5rem;gap:16px;}
+    .app-header{display:none;}
+    .hdr-market-wrap{display:none;}
+    .hdr-datetime{display:none;}
+
+    /* Sidebar market card */
+    .sidebar-market-card{
+      margin-top:10px;padding:10px 12px;border-radius:14px;
+      background:var(--bg);border:1.5px solid var(--border);
+    }
+    .smc-badge{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;}
+    .smc-badge.open{color:#0A6640;} .smc-badge.pre{color:#856404;} .smc-badge.after{color:#3C3489;} .smc-badge.closed{color:#C0392B;}
+    .smc-badge .market-badge-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+    .smc-badge.open .market-badge-dot{background:#27ae60;animation:pulse 1.5s infinite;}
+    .smc-badge.pre .market-badge-dot{background:#f0ad4e;animation:pulse 1.5s infinite;}
+    .smc-badge.after .market-badge-dot{background:#9c74d4;animation:pulse 1.5s infinite;}
+    .smc-badge.closed .market-badge-dot{background:#e74c3c;}
+    .smc-time{font-size:10px;color:var(--text-secondary);margin-top:3px;font-weight:500;}
+    .hdr-notif-btn{width:34px;height:34px;border-radius:12px;background:var(--purple-bg);border:1.5px solid rgba(83,74,183,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--purple-text);transition:background .15s;flex-shrink:0;}
+    .hdr-notif-btn:hover{background:var(--purple-text);color:#fff;}
+    .hdr-notif-btn svg{stroke:currentColor;}
     .app-header-left{display:flex;align-items:center;gap:12px;flex-shrink:0;}
     .app-logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,#b39ddb,#80cbc4);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 2px 10px rgba(179,157,219,.4);}
     .app-brand{display:flex;flex-direction:column;gap:2px;}
@@ -64,12 +84,16 @@
     .hdr-userinfo{display:flex;flex-direction:column;gap:1px;}
     .hdr-username{font-size:13px;font-weight:600;color:var(--text-primary);white-space:nowrap;line-height:1.2;}
     .hdr-usersub{font-size:10px;color:var(--text-secondary);white-space:nowrap;}
-    .market-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;white-space:nowrap;}
-    .market-badge.closed{background:#fde8e8;color:#c0392b;}
-    .market-badge.open{background:#e8f8ee;color:#1a7a44;}
-    .market-badge-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+    .market-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:6px 12px;border-radius:20px;white-space:nowrap;border:none;cursor:default;letter-spacing:.01em;}
+    .market-badge.closed{background:#FFE4E8;color:#C0392B;}
+    .market-badge.open{background:#D8F5E9;color:#0A6640;}
+    .market-badge.pre{background:#FFF3CD;color:#856404;}
+    .market-badge.after{background:#E8E0FF;color:#3C3489;}
+    .market-badge-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
     .market-badge.closed .market-badge-dot{background:#e74c3c;}
     .market-badge.open .market-badge-dot{background:#27ae60;animation:pulse 1.5s infinite;}
+    .market-badge.pre .market-badge-dot{background:#f0ad4e;animation:pulse 1.5s infinite;}
+    .market-badge.after .market-badge-dot{background:#9c74d4;animation:pulse 1.5s infinite;}
     .live-badge{display:inline-flex;align-items:center;gap:5px;background:var(--teal-bg);color:var(--teal-text);font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;}
     .live-dot{width:6px;height:6px;border-radius:50%;background:var(--up);animation:pulse 1.5s infinite;}
     .error-badge{background:var(--coral-bg);color:var(--coral-text);font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;}
@@ -168,17 +192,26 @@
     }
 
     /* ── Sidebar nav ── */
-    .app-layout{display:flex;gap:20px;min-height:80vh;align-items:flex-start;}
-    .sidebar{width:170px;flex-shrink:0;display:flex;flex-direction:column;gap:2px;padding:12px 10px 20px;background:var(--surface);border-radius:18px;border:1px solid var(--border);position:sticky;top:20px;align-self:flex-start;box-shadow:0 2px 12px rgba(0,0,0,.05);}
+    .app-layout{display:block;min-height:100vh;}
+    /* ── Home quick-nav pills ── */
+    .home-quicknav{display:flex;gap:8px;margin-bottom:1.5rem;}
+    .hqn-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px 10px 10px;background:#fff;border:1.5px solid var(--border);border-radius:14px;font-size:13px;font-weight:600;color:var(--text-secondary);cursor:pointer;font-family:inherit;transition:border-color .15s,color .15s;white-space:nowrap;flex:1;}
+    .hqn-btn:hover{border-color:var(--purple-text);color:var(--purple-text);}
+    .hqn-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .hqn-icon svg{width:14px;height:14px;}
+
+    /* ── Sidebar ── */
+    .sidebar{width:56px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:16px 8px;background:var(--surface);border-radius:18px;border:1px solid var(--border);position:fixed;top:24px;left:24px;bottom:24px;box-shadow:0 2px 12px rgba(0,0,0,.05);}
     .sidebar-logo{display:none;}
-    .sidebar-section{font-size:10px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.08em;padding:10px 10px 6px;opacity:.6;}
-    .tab-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:13px;font-weight:500;color:var(--text-secondary);background:none;border:none;border-radius:12px;cursor:pointer;transition:color .15s,background .15s;font-family:inherit;white-space:nowrap;width:100%;text-align:left;}
-    .tab-btn svg{width:17px;height:17px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.7;transition:opacity .15s;}
+    .sidebar-section{display:none;}
+    .tab-btn{display:flex;align-items:center;justify-content:center;padding:11px;font-size:0;color:var(--text-secondary);background:none;border:none;border-radius:14px;cursor:pointer;transition:color .15s,background .15s;width:40px;height:40px;}
+    .tab-btn svg{width:20px;height:20px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.6;transition:opacity .15s;}
     .tab-btn:hover{color:var(--purple-text);background:var(--purple-bg);}
     .tab-btn:hover svg{opacity:1;}
-    .tab-btn.active{color:#3b6ef8;background:#e8effe;font-weight:600;}
-    .tab-btn.active svg{stroke:#3b6ef8;opacity:1;}
-    .tab-content{flex:1;min-width:0;}
+    .tab-btn.active{color:#534AB7;background:#EEEDFE;}
+    .tab-btn.active svg{stroke:#534AB7;opacity:1;}
+    .tab-content{margin-left:80px;flex:1;min-width:0;}
+    .app-layout{display:block;min-height:100vh;}
 
     /* Tab panels */
     .tab-panel{display:none;}
@@ -502,15 +535,16 @@
       min-height:calc(100vh - 90px);
       position:relative;overflow:hidden;
       display:flex;flex-direction:column;
-      padding:2rem 1.5rem 2rem;
-      background:linear-gradient(160deg,#f0effe 0%,#faf9fc 60%);
+      padding:0 0 2rem;
+      background:transparent;
     }
-    @media(prefers-color-scheme:dark){.home-screen{background:linear-gradient(160deg,#1a1650 0%,#13121e 60%);}}
 
     /* Greeting */
     .home-greeting{margin-bottom:1.5rem;}
     .home-hello{font-size:34px;font-weight:800;color:var(--text-primary);line-height:1.15;letter-spacing:-.02em;}
     .home-sub{font-size:16px;font-weight:500;color:var(--text-secondary);margin-top:6px;}
+    .home-market-row{display:flex;align-items:center;gap:10px;margin-top:10px;}
+    .home-time{font-size:12px;color:var(--text-secondary);font-weight:500;}
 
     /* Total balance hero card */
     .home-balance-card{
@@ -635,7 +669,7 @@
       border-radius:50%;z-index:0;pointer-events:none;
     }
     .home-screen > *{position:relative;z-index:1;}
-    .home-deco{z-index:0;}
+    .home-deco{position:absolute;z-index:0;}
 
     /* Bottom nav arc on mobile */
     @media(max-width:700px){
@@ -645,7 +679,7 @@
 </head>
 <body>
 <!-- Lock screen -->
-<div id="lockScreen">
+<div id="lockScreen" style="display:none !important">
   <div class="lock-icon">💌</div>
   <div class="lock-title">Hi Babe</div>
   <div class="lock-sub">Enter passcode to continue</div>
@@ -697,37 +731,8 @@
 
 <div class="wrap">
 
-  <header class="app-header">
-    <div class="app-header-left">
-      <div class="app-logo">🎨</div>
-      <div class="app-brand">
-        <div class="app-brand-name">Paint's Portfolio</div>
-        <div class="app-brand-time" id="dateBadge">Loading…</div>
-      </div>
-    </div>
-
-    <div class="app-header-right">
-      <span class="live-badge" id="liveBadge" style="display:none;"><span class="live-dot"></span>Live</span>
-      <!-- Mobile search icon (only visible on small screens) -->
-      <button class="hdr-btn mob-search-btn" style="display:none;" onclick="toggleSearch()" title="Search">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="17" height="17"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
-      </button>
-      <!-- Inline search bar -->
-      <div class="hdr-search" onclick="toggleSearch()">
-        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
-        <span class="hdr-search-text">Search anything…</span>
-      </div>
-      <button class="hdr-btn" title="Notifications">🔔</button>
-      <div class="hdr-user">
-        <div class="hdr-avatar">SN</div>
-        <div class="hdr-userinfo">
-          <div class="hdr-username">Supitcha Nartnampong</div>
-          <div class="hdr-usersub">@supitcha</div>
-          <span class="market-badge closed" id="marketBadge"><span class="market-badge-dot"></span>Market closed</span>
-        </div>
-      </div>
-    </div>
-  </header>
+  <span class="live-badge" id="liveBadge" style="display:none;position:fixed;top:12px;right:12px;z-index:100;"><span class="live-dot"></span>Live</span>
+  <span class="market-badge closed" id="marketBadge" style="display:none;"><span class="market-badge-dot"></span>Market closed</span>
 
   <!-- Search overlay -->
   <div class="search-overlay" id="searchOverlay" onclick="if(event.target===this)toggleSearch()">
@@ -741,32 +746,26 @@
   <div class="page-title">Daily Portfolio Report</div>
   <div class="page-sub" id="pageSubtitle">16 US positions · 1 USD = 32.62 THB</div>
 
-  <!-- Sidebar + content layout -->
+  <!-- Sidebar -->
   <div class="app-layout">
   <nav class="sidebar">
     <button class="tab-btn active" onclick="showTab('home',this)">
       <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
-      Home
     </button>
     <button class="tab-btn" onclick="showTab('overview',this)">
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-      Dashboard
     </button>
     <button class="tab-btn" onclick="showTab('holdings',this)">
       <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 2v10l6.5 3.8"/></svg>
-      Portfolio
     </button>
     <button class="tab-btn" onclick="showTab('news',this)">
       <svg viewBox="0 0 24 24"><path d="M4 4h16v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/><path d="M8 4V2"/><path d="M16 4V2"/><path d="M8 11h8"/><path d="M8 15h5"/></svg>
-      News
     </button>
     <button class="tab-btn" onclick="showTab('recs',this)">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M9 15l-4 6h14l-4-6"/></svg>
-      Recs
+      <svg viewBox="0 0 24 24"><path d="M9 21h6"/><path d="M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/></svg>
     </button>
     <button class="tab-btn" onclick="showTab('tracker',this)">
       <svg viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>
-      Tracker
     </button>
   </nav>
   <div class="tab-content">
@@ -778,6 +777,34 @@
       <div class="home-greeting">
         <div class="home-hello" id="homeHello">Hello Paint,</div>
         <div class="home-sub" id="homeSub">How's your day going?</div>
+        <div class="home-market-row">
+          <span class="smc-badge closed" id="sidebarMarketBadge"><span class="market-badge-dot"></span>Market Closed</span>
+          <span class="home-time" id="sidebarDatetime"></span>
+        </div>
+      </div>
+
+      <!-- Quick nav pills -->
+      <div class="home-quicknav">
+        <button class="hqn-btn" onclick="showTab('overview')">
+          <span class="hqn-icon" style="background:#D8F5E9;"><svg viewBox="0 0 24 24" fill="none" stroke="#0A6640" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
+          Dashboard
+        </button>
+        <button class="hqn-btn" onclick="showTab('holdings')">
+          <span class="hqn-icon" style="background:#DDE8FD;"><svg viewBox="0 0 24 24" fill="none" stroke="#1A3F8C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 2v10l6.5 3.8"/></svg></span>
+          Portfolio
+        </button>
+        <button class="hqn-btn" onclick="showTab('news')">
+          <span class="hqn-icon" style="background:#FDE8D8;"><svg viewBox="0 0 24 24" fill="none" stroke="#8C3D10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/><path d="M8 4V2"/><path d="M16 4V2"/><path d="M8 11h8"/><path d="M8 15h5"/></svg></span>
+          News
+        </button>
+        <button class="hqn-btn" onclick="showTab('recs')">
+          <span class="hqn-icon" style="background:#FFF3CD;"><svg viewBox="0 0 24 24" fill="none" stroke="#856404" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6"/><path d="M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/></svg></span>
+          Strategies
+        </button>
+        <button class="hqn-btn" onclick="showTab('tracker')">
+          <span class="hqn-icon" style="background:#D4F2EE;"><svg viewBox="0 0 24 24" fill="none" stroke="#085041" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg></span>
+          Tracker
+        </button>
       </div>
 
       <!-- Balance hero card -->
@@ -1432,16 +1459,75 @@ async function renderNews() {
   }, interval);
 }
 
+function updateMarketBadge() {
+  // Market hours in ICT (UTC+7)
+  // Regular: 21:30–04:00, Pre-market: 16:00–21:30, After-hours: 04:00–08:00
+  const now = new Date();
+  const ict = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }));
+  const h = ict.getHours(), m = ict.getMinutes();
+  const mins = h * 60 + m;
+  const mb = document.getElementById('marketBadge');
+  if (!mb) return;
+
+  let cls, dot, label, emoji;
+  if ((mins >= 21*60+30) || (mins < 4*60)) {
+    cls='open';  label='Regular Trading';
+  } else if (mins >= 16*60 && mins < 21*60+30) {
+    cls='pre';   label='Pre-Market';
+  } else if (mins >= 4*60 && mins < 8*60) {
+    cls='after'; label='After-Hours';
+  } else {
+    cls='closed'; label='Market Closed';
+  }
+  mb.className = 'market-badge ' + cls;
+  mb.innerHTML = `<span class="market-badge-dot"></span>${label}`;
+
+  // Also update sidebar card
+  const sb = document.getElementById('sidebarMarketBadge');
+  if (sb) { sb.className = 'smc-badge ' + cls; sb.innerHTML = `<span class="market-badge-dot"></span>${label}`; }
+}
+function updateDatetime() {
+  const now = new Date();
+  const opts = { timeZone:'Asia/Bangkok', weekday:'short', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', hour12:false };
+  const str = now.toLocaleString('en-US', opts) + ' ICT';
+  const el = document.getElementById('hdrDatetime');
+  if (el) el.textContent = str;
+  const sb = document.getElementById('sidebarDatetime');
+  if (sb) sb.textContent = str;
+}
+updateDatetime();
+setInterval(updateDatetime, 30000);
+updateMarketBadge();
+setInterval(updateMarketBadge, 60000);
+
 function renderHome() {
   // Greeting based on Bangkok time
   const h = new Date().toLocaleString('en-US', { timeZone:'Asia/Bangkok', hour:'numeric', hour12:false }) | 0;
-  const greeting = h < 12 ? 'Good morning, Paint,' : h < 17 ? 'Good afternoon, Paint,' : h < 21 ? 'Good evening, Paint,' : 'Good night, Paint,';
+  let greeting, sub;
+  if (h >= 5 && h < 12) {
+    greeting = 'Good morning, Paint ☀️';
+    sub = 'Start the day strong!';
+  } else if (h >= 12 && h < 14) {
+    greeting = 'Good afternoon, Paint 🌤️';
+    sub = 'Hope lunch was good 🍜';
+  } else if (h >= 14 && h < 17) {
+    greeting = 'Good afternoon, Paint 🌤️';
+    sub = 'Markets open soon tonight!';
+  } else if (h >= 17 && h < 21) {
+    greeting = 'Good evening, Paint 🌅';
+    sub = 'Pre-market is warming up 📊';
+  } else if (h >= 21 || h < 1) {
+    greeting = 'Good evening, Paint 🌙';
+    sub = 'Markets are live right now!';
+  } else if (h >= 1 && h < 4) {
+    greeting = 'Up late, Paint? 🦉';
+    sub = 'Night owl trading session 📈';
+  } else {
+    greeting = 'Good night, Paint 😴';
+    sub = 'Rest up, big day tomorrow!';
+  }
   document.getElementById('homeHello').textContent = greeting;
-
-  // Sub based on market state
-  const mb = document.getElementById('marketBadge');
-  const isOpen = mb && mb.classList.contains('open');
-  document.getElementById('homeSub').textContent = isOpen ? 'Markets are open right now' : "How's your day going?";
+  document.getElementById('homeSub').textContent = sub;
 
   // Sync balance hero card from main metrics
   const tvEl = document.getElementById('totalValue');
@@ -1466,10 +1552,10 @@ function renderHome() {
 
 function showTab(name, btn) {
   document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.sidebar .tab-btn').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
   if (btn) btn.classList.add('active');
-  else document.querySelector(`.sidebar .tab-btn[onclick*="'${name}'"]`)?.classList.add('active');
+  else document.querySelector(`.tab-btn[onclick*="'${name}'"]`)?.classList.add('active');
   if (name === 'overview' && !chartsInited) { chartsInited = true; initCharts(); }
   if (name === 'news') renderNews();
   if (name === 'tracker') renderTracker();
@@ -2009,14 +2095,7 @@ async function loadPrices() {
     const anyQ = pm['SPY'] || quotes[0];
     const isOpen = anyQ?.marketState === 'REGULAR';
     applyLivePrices(pm, isOpen);
-    const mb = $('marketBadge');
-    if (isOpen) {
-      mb.className='market-badge open';
-      mb.innerHTML='<span class="market-badge-dot"></span>Market open';
-    } else {
-      mb.className='market-badge closed';
-      mb.innerHTML='<span class="market-badge-dot"></span>Market closed';
-    }
+    updateMarketBadge();
     $('liveBadge').style.display = isOpen ? 'inline-flex' : 'none';
   } catch(e) {
     console.warn('Live prices unavailable:',e.message);
