@@ -627,39 +627,36 @@
     @keyframes lockShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
     .lock-shake{animation:lockShake .35s ease;}
 
-    .home-news-title{font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:10px;}
-    .home-news-list{display:flex;flex-direction:column;gap:9px;flex:1;}
+    .home-news-title{font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:12px;}
+    .home-news-list{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 
-    /* News cards — alternating pastels */
+    /* News cards — card style like inspiration */
     .home-news-card{
-      border-radius:16px;padding:14px 16px;
-      text-decoration:none;display:block;
+      border-radius:20px;padding:0;
+      text-decoration:none;display:flex;flex-direction:column;
+      overflow:hidden;background:var(--card);
+      border:1px solid var(--border);
       transition:opacity .15s,transform .1s;
     }
-    .home-news-card:nth-child(1){background:#EAE6FD;}
-    .home-news-card:nth-child(2){background:#FDE8D8;}
-    .home-news-card:nth-child(3){background:#D8F5E9;}
-    .home-news-card:nth-child(4){background:#DDE8FD;}
-    @media(prefers-color-scheme:dark){
-      .home-news-card:nth-child(1){background:#1a1750;}
-      .home-news-card:nth-child(2){background:#3d1c08;}
-      .home-news-card:nth-child(3){background:#0d3d23;}
-      .home-news-card:nth-child(4){background:#111e42;}
-    }
     .home-news-card:active{opacity:.8;transform:scale(.99);}
-    .hnc-ticker{font-size:11px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
-    .home-news-card:nth-child(1) .hnc-ticker{color:#3C3489;}
-    .home-news-card:nth-child(2) .hnc-ticker{color:#8C3D10;}
-    .home-news-card:nth-child(3) .hnc-ticker{color:#0A6640;}
-    .home-news-card:nth-child(4) .hnc-ticker{color:#1A3F8C;}
-    @media(prefers-color-scheme:dark){
-      .home-news-card:nth-child(1) .hnc-ticker{color:#AFA9EC;}
-      .home-news-card:nth-child(2) .hnc-ticker{color:#F0997B;}
-      .home-news-card:nth-child(3) .hnc-ticker{color:#6EEAA8;}
-      .home-news-card:nth-child(4) .hnc-ticker{color:#85B7EB;}
-    }
-    .hnc-text{font-size:13px;font-weight:500;color:var(--text-primary);line-height:1.5;}
-    .hnc-source{font-size:10.5px;margin-top:5px;font-weight:600;opacity:.6;color:var(--text-secondary);}
+    .hnc-img{height:90px;display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;}
+    .home-news-card:nth-child(1) .hnc-img{background:#D8F5E9;}
+    .home-news-card:nth-child(2) .hnc-img{background:#DDE8FD;}
+    .home-news-card:nth-child(3) .hnc-img{background:#FDE8D8;}
+    .home-news-card:nth-child(4) .hnc-img{background:#EAE6FD;}
+    .hnc-body{padding:12px 14px 14px;flex:1;display:flex;flex-direction:column;}
+    .hnc-ticker{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:8px;width:fit-content;}
+    .home-news-card:nth-child(1) .hnc-ticker{background:#D8F5E9;color:#0A6640;}
+    .home-news-card:nth-child(2) .hnc-ticker{background:#DDE8FD;color:#1A3F8C;}
+    .home-news-card:nth-child(3) .hnc-ticker{background:#FDE8D8;color:#8C3D10;}
+    .home-news-card:nth-child(4) .hnc-ticker{background:#EAE6FD;color:#3C3489;}
+    .hnc-text{font-size:13px;font-weight:600;color:var(--text-primary);line-height:1.4;flex:1;}
+    .hnc-source{font-size:11px;margin-top:8px;font-weight:500;color:var(--text-secondary);display:flex;align-items:center;gap:4px;}
+    .hnc-source-dot{width:14px;height:14px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0;}
+    .home-news-card:nth-child(1) .hnc-source-dot{background:#0A6640;}
+    .home-news-card:nth-child(2) .hnc-source-dot{background:#1A3F8C;}
+    .home-news-card:nth-child(3) .hnc-source-dot{background:#8C3D10;}
+    .home-news-card:nth-child(4) .hnc-source-dot{background:#3C3489;}
 
     /* Decorative blob */
     .home-deco{
@@ -805,24 +802,6 @@
           <span class="hqn-icon" style="background:#D4F2EE;"><svg viewBox="0 0 24 24" fill="none" stroke="#085041" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg></span>
           Tracker
         </button>
-      </div>
-
-      <!-- Balance hero card -->
-      <div class="home-balance-card">
-        <div class="hbc-label">Total Portfolio</div>
-        <div class="hbc-value" id="homeBalanceVal">฿—</div>
-        <div class="hbc-sub" id="homeBalanceSub">Loading live prices…</div>
-        <div class="hbc-row">
-          <button class="hbc-btn" onclick="showTab('overview')">View Dashboard →</button>
-          <div class="hbc-change" id="homeBalanceChg"></div>
-        </div>
-      </div>
-
-      <!-- Quick actions -->
-      <div class="home-actions">
-        <button class="home-action-pill hap-portfolio" onclick="showTab('holdings')">📊 Portfolio</button>
-        <button class="home-action-pill hap-news" onclick="showTab('news')">📰 News</button>
-        <button class="home-action-pill hap-recs" onclick="showTab('recs')">💡 Recs</button>
       </div>
 
       <div class="home-news-title">Recent News</div>
@@ -983,6 +962,15 @@
 
   <!-- Tab 1: Holdings -->
   <div class="tab-panel" id="tab-holdings">
+    <div class="home-balance-card" style="margin-bottom:1.25rem;">
+      <div class="hbc-label">Total Portfolio</div>
+      <div class="hbc-value" id="homeBalanceVal">฿—</div>
+      <div class="hbc-sub" id="homeBalanceSub">Loading live prices…</div>
+      <div class="hbc-row">
+        <button class="hbc-btn" onclick="showTab('overview')">View Dashboard →</button>
+        <div class="hbc-change" id="homeBalanceChg"></div>
+      </div>
+    </div>
     <div class="filter-bar" id="filterBar">
       <div class="filter-pill active" data-filter="all" onclick="setFilter('all')">All <span class="filter-count" id="cnt-all">16</span></div>
       <div class="filter-pill" data-filter="semis" onclick="setFilter('semis')">Semiconductors <span class="filter-count" id="cnt-semis"></span></div>
@@ -1529,7 +1517,7 @@ function renderHome() {
   document.getElementById('homeHello').textContent = greeting;
   document.getElementById('homeSub').textContent = sub;
 
-  // Sync balance hero card from main metrics
+  // Sync balance card in holdings tab from main metrics
   const tvEl = document.getElementById('totalValue');
   const thbEl = document.getElementById('totalTHB');
   const dcEl = document.getElementById('dayChange');
@@ -1542,11 +1530,18 @@ function renderHome() {
   // Latest 4 news items
   const todayStr = new Date().toLocaleDateString('sv', { timeZone:'Asia/Bangkok' });
   const items = [...NEWS_DATA].sort((a,b) => b.date.localeCompare(a.date)).slice(0, 4);
-  document.getElementById('homeNewsList').innerHTML = items.map(n => `
+  const emojis = ['📈','📊','💹','📉'];
+  document.getElementById('homeNewsList').innerHTML = items.map((n,i) => `
     <a class="home-news-card" href="${n.url}" target="_blank" rel="noopener">
-      <div class="hnc-ticker">${n.ticker} <span style="font-size:10px;font-weight:500;opacity:.6;">${n.date === todayStr ? 'Today' : n.date}</span></div>
-      <div class="hnc-text">${n.text}</div>
-      <div class="hnc-source">↗ ${n.source}</div>
+      <div class="hnc-img">${emojis[i % emojis.length]}</div>
+      <div class="hnc-body">
+        <div class="hnc-ticker">${n.ticker}</div>
+        <div class="hnc-text">${n.text}</div>
+        <div class="hnc-source">
+          <span class="hnc-source-dot">${n.source.charAt(0)}</span>
+          ${n.source} · ${n.date === todayStr ? 'Today' : n.date}
+        </div>
+      </div>
     </a>`).join('');
 }
 
@@ -1560,6 +1555,16 @@ function showTab(name, btn) {
   if (name === 'news') renderNews();
   if (name === 'tracker') renderTracker();
   if (name === 'home') renderHome();
+  if (name === 'holdings') {
+    const tvEl = document.getElementById('totalValue');
+    const thbEl = document.getElementById('totalTHB');
+    const dcEl = document.getElementById('dayChange');
+    if (tvEl && document.getElementById('homeBalanceVal')) {
+      document.getElementById('homeBalanceVal').textContent = tvEl.textContent || '฿—';
+      document.getElementById('homeBalanceSub').textContent = thbEl ? thbEl.textContent : '';
+      document.getElementById('homeBalanceChg').textContent = dcEl ? dcEl.textContent : '';
+    }
+  }
   localStorage.setItem('activeTab', name);
 }
 
