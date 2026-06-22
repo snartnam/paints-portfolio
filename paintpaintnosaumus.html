@@ -315,24 +315,24 @@
     .news-item.prev{opacity:.7;}
     .news-item.prev:hover{opacity:.9;}
     /* Two-column layout: calendar left, news right */
-    .news-main-row{display:grid;grid-template-columns:280px 1fr;gap:16px;align-items:start;}
+    .news-main-row{display:grid;grid-template-columns:220px 1fr;gap:16px;align-items:start;}
     .news-right-col{display:flex;flex-direction:column;gap:0;}
     /* Economic calendar */
-    .econ-cal{background:var(--card-bg);border-radius:20px;padding:16px;border:1.5px solid var(--border);}
-    .econ-cal-title{font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:14px;display:flex;align-items:center;gap:7px;}
-    .cal-month-hdr{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-secondary);margin:12px 0 4px;padding-bottom:4px;border-bottom:1px solid var(--border);}
+    .econ-cal{background:var(--card-bg);border-radius:20px;padding:14px;border:1.5px solid var(--border);}
+    .econ-cal-title{font-size:12px;font-weight:700;color:var(--text-primary);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+    .cal-month-hdr{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-secondary);margin:8px 0 3px;padding-bottom:3px;border-bottom:1px solid var(--border);}
     .cal-month-hdr:first-child{margin-top:0;}
-    .cal-event{display:flex;gap:10px;align-items:flex-start;padding:8px 0 8px 10px;border-bottom:1px solid var(--border);border-left:3px solid transparent;margin-left:-1px;}
+    .cal-event{display:flex;gap:8px;align-items:flex-start;padding:6px 0 6px 8px;border-bottom:1px solid var(--border);border-left:3px solid transparent;margin-left:-1px;}
     .cal-event.imp-high{border-left-color:#E07070;}
     .cal-event.imp-med{border-left-color:#FAC775;}
     .cal-event:last-child{border-bottom:none;padding-bottom:0;}
-    .cal-date-col{min-width:44px;text-align:center;}
-    .cal-day{font-size:18px;font-weight:800;line-height:1;color:var(--text-primary);}
-    .cal-mon{font-size:10px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;}
+    .cal-date-col{min-width:36px;text-align:center;}
+    .cal-day{font-size:15px;font-weight:800;line-height:1;color:var(--text-primary);}
+    .cal-mon{font-size:9px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;}
     .cal-body{flex:1;}
-    .cal-name{font-size:12.5px;font-weight:600;color:var(--text-primary);line-height:1.3;}
-    .cal-meta{font-size:10.5px;color:var(--text-secondary);margin-top:2px;}
-    .cal-imp{font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:10px;margin-top:4px;display:inline-block;}
+    .cal-name{font-size:11.5px;font-weight:600;color:var(--text-primary);line-height:1.3;}
+    .cal-meta{font-size:10px;color:var(--text-secondary);margin-top:1px;}
+    .cal-imp{font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;margin-top:3px;display:inline-block;}
     .cal-imp.high{background:#F5C4B3;color:#712B13;}
     .cal-imp.med{background:#FAC775;color:#412402;}
     .cal-past{opacity:.45;}
@@ -1432,8 +1432,10 @@ async function fetchLiveNews() {
 
 function renderEconCal() {
   const todayStr = new Date().toLocaleDateString('sv', { timeZone:'Asia/Bangkok' });
-  const upcoming = ECON_CAL.filter(e => e.date >= todayStr).slice(0, 14);
-  const past     = ECON_CAL.filter(e => e.date < todayStr).slice(-2).reverse();
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() + 7);
+  const cutoffStr = cutoff.toLocaleDateString('sv', { timeZone:'Asia/Bangkok' });
+  const upcoming = ECON_CAL.filter(e => e.date >= todayStr && e.date <= cutoffStr);
+  const past     = ECON_CAL.filter(e => e.date < todayStr).slice(-1);
   const events   = [...upcoming, ...past];
 
   // Group by month
@@ -1490,19 +1492,32 @@ async function renderNews() {
   let liveItems = [];
   try { liveItems = await getLiveNews(); } catch(e) {}
 
-  const PORTFOLIO_START = '2026-06-17'; // earliest date in NEWS_DATA
+  // Relevance filter: keep only news about portfolio holdings, market, Fed, semis/AI
+  const RELEVANT_KW = [
+    ...ALL_TICKERS,
+    'fed','federal reserve','fomc','interest rate','rate cut','rate hike','inflation','cpi','pce','gdp',
+    'semiconductor','chip','ai','artificial intelligence','data center','nvidia','arm','tsmc',
+    'tariff','trade','earnings','s&p 500','nasdaq','market','stocks','rally','selloff',
+    'memory','hbm','nand','gpu','cpu','eda','foundry','lithography'
+  ];
+  function isRelevant(n) {
+    const t = ((n.text || '') + ' ' + (n.ticker || '') + ' ' + (n.source || '')).toLowerCase();
+    return RELEVANT_KW.some(kw => t.includes(kw.toLowerCase()));
+  }
+  const filteredLive = liveItems.filter(isRelevant);
+
+  const PORTFOLIO_START = '2026-06-17';
 
   // Today's news: live feed first, fall back to static
-  const liveTodayItems = liveItems.filter(n => n.date === todayStr);
+  const liveTodayItems = filteredLive.filter(n => n.date === todayStr);
   const todayDisplay = liveTodayItems.length
     ? liveTodayItems
     : NEWS_DATA.filter(n => n.date === todayStr);
 
-  // Previous news: always include static NEWS_DATA for past dates,
-  // then layer in any live items from past dates (different URLs)
+  // Previous news
   const staticPrev = NEWS_DATA.filter(n => n.date < todayStr && n.date >= PORTFOLIO_START);
-  const livePrevUrls = new Set(liveItems.filter(n => n.date < todayStr).map(n => n.url));
-  const livePrev = liveItems.filter(n => n.date < todayStr && n.date >= PORTFOLIO_START);
+  const livePrevUrls = new Set(filteredLive.filter(n => n.date < todayStr).map(n => n.url));
+  const livePrev = filteredLive.filter(n => n.date < todayStr && n.date >= PORTFOLIO_START);
   const staticPrevFiltered = staticPrev.filter(n => !livePrevUrls.has(n.url));
   const prevItems = [...livePrev, ...staticPrevFiltered]
     .sort((a, b) => b.date.localeCompare(a.date) || (b._ts || 0) - (a._ts || 0));
