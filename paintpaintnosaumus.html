@@ -1308,6 +1308,72 @@ function newsItemHtml(n, prev) {
   </a>`;
 }
 
+// ── Approved news sources ────────────────────────────────────────────────────
+const APPROVED_SOURCES = [
+  'bloomberg','reuters','wall street journal','wsj','cnbc',
+  'the information','semianalysis','stratechery',
+  "tom's hardware",'tomshardware','anandtech',
+  'yahoo finance','seeking alpha','finviz',
+  'barron\'s','marketwatch','financial times','ft.com',
+  'techcrunch','the verge','ars technica','wired',
+];
+function isApprovedSource(publisher) {
+  const p = (publisher || '').toLowerCase();
+  return APPROVED_SOURCES.some(s => p.includes(s));
+}
+
+const ALL_TICKERS = ['NVDA','AMD','ARM','TSM','GOOGL','AMZN','MU','SNDK','ASML','LRCX','AMAT','CDNS','MRVL','LLY','COST','NBIS'];
+function detectTickerInText(text) {
+  const t = (text || '').toUpperCase();
+  return ALL_TICKERS.find(tk => new RegExp('\\b' + tk + '\\b').test(t)) || 'MARKET';
+}
+
+// ── RSS feeds (CNBC, Reuters, Tom's Hardware) via rss2json ───────────────────
+const RSS_FEEDS = [
+  { url:'https://www.cnbc.com/id/19854910/device/rss/rss.html',          source:'CNBC' },
+  { url:'https://www.cnbc.com/id/20910258/device/rss/rss.html',          source:'CNBC Markets' },
+  { url:'https://feeds.reuters.com/reuters/technologyNews',               source:'Reuters' },
+  { url:'https://feeds.reuters.com/reuters/businessNews',                 source:'Reuters' },
+  { url:'https://www.tomshardware.com/feeds/all',                         source:"Tom's Hardware" },
+  { url:'https://feeds.feedburner.com/wsj/xml/rss/3_7031.xml',           source:'WSJ Markets' },
+];
+const RSS2JSON = 'https://api.rss2json.com/v1/api.json?rss_url=';
+
+async function fetchRSSNews() {
+  const items = [];
+  await Promise.allSettled(RSS_FEEDS.map(async feed => {
+    try {
+      const res = await fetch(RSS2JSON + encodeURIComponent(feed.url), { signal: AbortSignal.timeout(8000) });
+      const data = await res.json();
+      if (!data.items?.length) return;
+      data.items.slice(0, 8).forEach(item => {
+        const ts = new Date(item.pubDate).getTime();
+        const dateStr = new Date(ts).toLocaleDateString('sv', { timeZone:'Asia/Bangkok' });
+        const ticker = detectTickerInText(item.title + ' ' + (item.description || ''));
+        items.push({
+          date: dateStr, _ts: ts,
+          ticker, color: tickerCardColor(ticker),
+          impact: classifyImpact(item.title || ''),
+          url: item.link, source: feed.source, text: item.title,
+        });
+      });
+    } catch(e) {}
+  }));
+  return items;
+}
+
+// ── Shared news cache ────────────────────────────────────────────────────────
+let _newsCache = null;
+let _newsCacheTime = 0;
+const NEWS_CACHE_TTL = 20 * 60 * 1000;
+
+async function getLiveNews() {
+  if (_newsCache && Date.now() - _newsCacheTime < NEWS_CACHE_TTL) return _newsCache;
+  _newsCache = await fetchLiveNews();
+  _newsCacheTime = Date.now();
+  return _newsCache;
+}
+
 async function fetchNewsFromProxy(url, proxy) {
   const res = await fetch(`${proxy}${encodeURIComponent(url)}`, { signal: AbortSignal.timeout(7000) });
   if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -1319,8 +1385,9 @@ async function fetchLiveNews() {
   const seen = new Set();
   const items = [];
 
+  // Yahoo Finance per-ticker news
   const results = await Promise.allSettled(PORTFOLIO.map(async p => {
-    const url = `https://query2.finance.yahoo.com/v1/finance/search?q=${p.ticker}&newsCount=5&enableFuzzyQuery=false&enableCb=false`;
+    const url = `https://query2.finance.yahoo.com/v1/finance/search?q=${p.ticker}&newsCount=8&enableFuzzyQuery=false&enableCb=false`;
     let data;
     try {
       data = await fetchNewsFromProxy(url, 'https://corsproxy.io/?url=');
@@ -1335,6 +1402,7 @@ async function fetchLiveNews() {
     (r.value || []).forEach(n => {
       if (seen.has(n.uuid)) return;
       seen.add(n.uuid);
+      if (!isApprovedSource(n.publisher)) return;
       const ts = (n.providerPublishTime || 0) * 1000;
       const dateStr = new Date(ts).toLocaleDateString('sv', { timeZone:'Asia/Bangkok' });
       items.push({
@@ -1349,6 +1417,14 @@ async function fetchLiveNews() {
       });
     });
   });
+
+  // Merge RSS feed news (CNBC, Reuters, Tom's Hardware, WSJ)
+  try {
+    const rssItems = await fetchRSSNews();
+    rssItems.forEach(n => {
+      if (!seen.has(n.url)) { seen.add(n.url); items.push(n); }
+    });
+  } catch(e) {}
 
   items.sort((a, b) => b._ts - a._ts);
   return items;
@@ -1412,7 +1488,7 @@ async function renderNews() {
   const todayLabel = new Date().toLocaleDateString('en-US', { timeZone:'Asia/Bangkok', month:'long', day:'numeric' });
 
   let liveItems = [];
-  try { liveItems = await fetchLiveNews(); } catch(e) {}
+  try { liveItems = await getLiveNews(); } catch(e) {}
 
   const PORTFOLIO_START = '2026-06-17'; // earliest date in NEWS_DATA
 
@@ -1543,26 +1619,53 @@ function renderHome() {
     document.getElementById('homeBalanceChg').textContent = dcEl ? dcEl.textContent : '';
   }
 
-  // Latest 4 news items
-  const items = [...NEWS_DATA].sort((a,b) => b.date.localeCompare(a.date)).slice(0, 4);
+  // Latest 4 news items — use live cache, fall back to static
   const emojis = ['📈','📊','💹','📉'];
-  document.getElementById('homeNewsList').innerHTML = items.map((n,i) => {
-    const [,mm,dd] = n.date.split('-');
-    const dateLabel = new Date(n.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
-    const sourceName = n.source.split('·')[0].trim();
-    return `
-    <a class="home-news-card" href="${n.url}" target="_blank" rel="noopener">
-      <div class="hnc-img">${emojis[i % emojis.length]}</div>
-      <div class="hnc-body">
-        <div class="hnc-ticker">${n.ticker}</div>
-        <div class="hnc-text">${n.text}</div>
-        <div class="hnc-source">
-          <span class="hnc-source-dot">${sourceName.charAt(0)}</span>
-          ${sourceName} · ${dateLabel}
+  const list = document.getElementById('homeNewsList');
+  list.innerHTML = `<div style="grid-column:1/-1;padding:12px;color:var(--text-secondary);font-size:13px;">Loading news…</div>`;
+
+  getLiveNews().then(liveItems => {
+    const items = liveItems.length
+      ? liveItems.slice(0, 4)
+      : [...NEWS_DATA].sort((a,b) => b.date.localeCompare(a.date)).slice(0, 4);
+
+    list.innerHTML = items.map((n,i) => {
+      const dateLabel = n._ts
+        ? timeAgo(n._ts)
+        : new Date(n.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      const sourceName = n.source.split('·')[0].trim();
+      return `
+      <a class="home-news-card" href="${n.url}" target="_blank" rel="noopener">
+        <div class="hnc-img">${emojis[i % emojis.length]}</div>
+        <div class="hnc-body">
+          <div class="hnc-ticker">${n.ticker}</div>
+          <div class="hnc-text">${n.text}</div>
+          <div class="hnc-source">
+            <span class="hnc-source-dot">${sourceName.charAt(0)}</span>
+            ${sourceName} · ${dateLabel}
+          </div>
         </div>
-      </div>
-    </a>`;
-  }).join('');
+      </a>`;
+    }).join('');
+  }).catch(() => {
+    const items = [...NEWS_DATA].sort((a,b) => b.date.localeCompare(a.date)).slice(0, 4);
+    list.innerHTML = items.map((n,i) => {
+      const dateLabel = new Date(n.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      const sourceName = n.source.split('·')[0].trim();
+      return `
+      <a class="home-news-card" href="${n.url}" target="_blank" rel="noopener">
+        <div class="hnc-img">${emojis[i % emojis.length]}</div>
+        <div class="hnc-body">
+          <div class="hnc-ticker">${n.ticker}</div>
+          <div class="hnc-text">${n.text}</div>
+          <div class="hnc-source">
+            <span class="hnc-source-dot">${sourceName.charAt(0)}</span>
+            ${sourceName} · ${dateLabel}
+          </div>
+        </div>
+      </a>`;
+    }).join('');
+  });
 }
 
 function showTab(name, btn) {
