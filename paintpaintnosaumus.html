@@ -1081,6 +1081,7 @@ function lockKey(char) {
     setTimeout(() => {
       if (lockInput === PASSCODE) {
         sessionStorage.setItem('unlocked', '1');
+        sessionStorage.setItem('lastActivity', Date.now());
         document.getElementById('lockScreen').style.display = 'none';
       } else {
         const dots = document.getElementById('lockDots');
@@ -1109,9 +1110,42 @@ document.addEventListener('keydown', e => {
   if (e.key.length === 1) lockKey(e.key.toUpperCase());
 });
 
-// Check if already unlocked this session
+// Lock on refresh — clear unlock when page unloads
+window.addEventListener('beforeunload', () => {
+  sessionStorage.removeItem('unlocked');
+  sessionStorage.removeItem('lastActivity');
+});
+
+// Inactivity timeout: 20 minutes
+const INACTIVITY_MS = 20 * 60 * 1000;
+function resetActivity() {
+  if (sessionStorage.getItem('unlocked') === '1') {
+    sessionStorage.setItem('lastActivity', Date.now());
+  }
+}
+['mousemove','keydown','click','touchstart','scroll'].forEach(ev =>
+  document.addEventListener(ev, resetActivity, { passive: true })
+);
+setInterval(() => {
+  const last = parseInt(sessionStorage.getItem('lastActivity') || '0');
+  if (sessionStorage.getItem('unlocked') === '1' && Date.now() - last > INACTIVITY_MS) {
+    sessionStorage.removeItem('unlocked');
+    sessionStorage.removeItem('lastActivity');
+    lockInput = '';
+    updateLockDots();
+    document.getElementById('lockError').textContent = '';
+    document.getElementById('lockScreen').style.display = 'flex';
+  }
+}, 30000);
+
+// Check if already unlocked this session (won't apply after refresh due to beforeunload)
 if (sessionStorage.getItem('unlocked') === '1') {
-  document.getElementById('lockScreen').style.display = 'none';
+  const last = parseInt(sessionStorage.getItem('lastActivity') || '0');
+  if (Date.now() - last < INACTIVITY_MS) {
+    document.getElementById('lockScreen').style.display = 'none';
+  } else {
+    sessionStorage.removeItem('unlocked');
+  }
 }
 
 // ── Portfolio data ────────────────────────────────────────────────────────────
