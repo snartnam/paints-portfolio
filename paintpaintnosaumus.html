@@ -631,6 +631,20 @@
     .lock-shake{animation:lockShake .35s ease;}
 
     .home-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;margin-top:1.5rem;}
+
+    /* Market Overview */
+    .hmo-card{background:var(--card);border:1.5px solid var(--border);border-radius:20px;padding:16px;margin-bottom:1.5rem;}
+    .hmo-indices{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
+    .hmo-idx{background:var(--surface);border-radius:14px;padding:10px 12px;}
+    .hmo-idx-vix{background:#FFE59A20;border:1px solid #FFE59A;}
+    .hmo-idx-name{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-secondary);margin-bottom:4px;}
+    .hmo-idx-price{font-size:16px;font-weight:800;color:var(--text-primary);line-height:1.1;}
+    .hmo-idx-chg{font-size:11px;font-weight:700;margin-top:3px;}
+    .hmo-idx-chg.up{color:#1a6b52;} .hmo-idx-chg.dn{color:#8c1f35;} .hmo-idx-chg.flat{color:var(--text-secondary);}
+    .hmo-mood{font-size:13px;font-weight:600;color:var(--text-primary);line-height:1.5;padding:10px 12px;background:var(--surface);border-radius:12px;margin-bottom:8px;}
+    .hmo-headline{font-size:11.5px;color:var(--text-secondary);font-weight:500;line-height:1.5;padding:0 2px;}
+    .hmo-headline a{color:var(--purple-text);text-decoration:none;font-weight:600;}
+    .hmo-updated{font-size:11px;color:var(--text-secondary);font-weight:500;}
     .home-news-title{font-size:16px;font-weight:700;color:var(--text-primary);}
     .home-viewall{background:none;border:none;font-size:13px;font-weight:600;color:#534AB7;cursor:pointer;font-family:inherit;padding:0;}
     .home-news-list{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
@@ -815,6 +829,38 @@
           <span class="hqn-icon" style="background:#B7E1D1;"><svg viewBox="0 0 24 24" fill="none" stroke="#1a6b52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg></span>
           Tracker
         </button>
+      </div>
+
+      <!-- Market Overview -->
+      <div class="home-section-head" style="margin-top:0;">
+        <div class="home-news-title">Market Overview</div>
+        <span class="hmo-updated" id="hmoUpdated"></span>
+      </div>
+      <div class="hmo-card">
+        <div class="hmo-indices">
+          <div class="hmo-idx">
+            <div class="hmo-idx-name">S&amp;P 500</div>
+            <div class="hmo-idx-price" id="hmoSpxPrice">—</div>
+            <div class="hmo-idx-chg" id="hmoSpxChg">—</div>
+          </div>
+          <div class="hmo-idx">
+            <div class="hmo-idx-name">NASDAQ</div>
+            <div class="hmo-idx-price" id="hmoNdxPrice">—</div>
+            <div class="hmo-idx-chg" id="hmoNdxChg">—</div>
+          </div>
+          <div class="hmo-idx">
+            <div class="hmo-idx-name">DOW</div>
+            <div class="hmo-idx-price" id="hmoDjiPrice">—</div>
+            <div class="hmo-idx-chg" id="hmoDjiChg">—</div>
+          </div>
+          <div class="hmo-idx hmo-idx-vix">
+            <div class="hmo-idx-name">VIX</div>
+            <div class="hmo-idx-price" id="hmoVixPrice">—</div>
+            <div class="hmo-idx-chg" id="hmoVixChg">—</div>
+          </div>
+        </div>
+        <div class="hmo-mood" id="hmoMood">Loading market summary…</div>
+        <div class="hmo-headline" id="hmoHeadline"></div>
       </div>
 
       <div class="home-section-head">
@@ -1554,6 +1600,79 @@ async function renderNews() {
   }, interval);
 }
 
+function updateHomeMarketOv() {
+  const pm = window.cachedPriceMap;
+
+  function fmtIdx(q, isVix) {
+    if (!q) return { price:'—', chg:'—', cls:'flat' };
+    const price = q.regularMarketPrice || q.regularMarketPreviousClose || 0;
+    const chgPct = q.regularMarketChangePercent || 0;
+    const chgAbs = q.regularMarketChange || 0;
+    const cls = chgPct > 0.05 ? 'up' : chgPct < -0.05 ? 'dn' : 'flat';
+    const arrow = chgPct > 0.05 ? '▲' : chgPct < -0.05 ? '▼' : '—';
+    const priceStr = isVix
+      ? price.toFixed(2)
+      : price >= 10000
+        ? price.toLocaleString('en-US', {maximumFractionDigits:0})
+        : price.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    const chgStr = isVix
+      ? `${arrow} ${chgPct.toFixed(1)}%`
+      : `${arrow} ${chgPct >= 0 ? '+' : ''}${chgPct.toFixed(2)}%`;
+    return { price: priceStr, chg: chgStr, cls, raw: { price, chgPct } };
+  }
+
+  const spx = fmtIdx(pm?.['^GSPC'] || pm?.['%5EGSPC']);
+  const ndx = fmtIdx(pm?.['^NDX']  || pm?.['%5ENDX']);
+  const dji = fmtIdx(pm?.['^DJI']  || pm?.['%5EDJI']);
+  const vix = fmtIdx(pm?.['^VIX']  || pm?.['%5EVIX'], true);
+
+  const $ = id => document.getElementById(id);
+  if (!$('hmoSpxPrice')) return;
+
+  $('hmoSpxPrice').textContent = spx.price;
+  $('hmoSpxChg').textContent  = spx.chg;
+  $('hmoSpxChg').className    = 'hmo-idx-chg ' + spx.cls;
+
+  $('hmoNdxPrice').textContent = ndx.price;
+  $('hmoNdxChg').textContent  = ndx.chg;
+  $('hmoNdxChg').className    = 'hmo-idx-chg ' + ndx.cls;
+
+  $('hmoDjiPrice').textContent = dji.price;
+  $('hmoDjiChg').textContent  = dji.chg;
+  $('hmoDjiChg').className    = 'hmo-idx-chg ' + dji.cls;
+
+  $('hmoVixPrice').textContent = vix.price;
+  $('hmoVixChg').textContent  = vix.chg;
+  $('hmoVixChg').className    = 'hmo-idx-chg ' + vix.cls;
+
+  // Market mood summary
+  const spxPct = spx.raw?.chgPct || 0;
+  const vixVal = pm?.['^VIX']?.regularMarketPrice || pm?.['%5EVIX']?.regularMarketPrice || 0;
+  let mood;
+  if (spxPct > 1.5)        mood = '📈 Strong rally — risk-on. Tech and growth leading. Good day for the portfolio.';
+  else if (spxPct > 0.3)   mood = '🟢 Markets up today. Positive momentum across indices.';
+  else if (spxPct > -0.3)  mood = '⚖️ Mixed session. Markets largely flat — watch for direction into close.';
+  else if (spxPct > -1.5)  mood = '🔴 Markets pulling back. Monitor positions, no panic needed.';
+  else                      mood = '📉 Broad selloff. Risk-off sentiment — review stops and hedges.';
+
+  if (vixVal > 25) mood += ' ⚠️ VIX elevated — high fear in the market.';
+  else if (vixVal > 20) mood += ' VIX rising, some anxiety priced in.';
+  else if (vixVal < 14 && vixVal > 0) mood += ' VIX low — calm conditions.';
+
+  $('hmoMood').textContent = mood;
+
+  const nowStr = new Date().toLocaleTimeString('en-US', { timeZone:'Asia/Bangkok', hour:'2-digit', minute:'2-digit' });
+  const upd = $('hmoUpdated');
+  if (upd) upd.textContent = 'Updated ' + nowStr + ' ICT';
+
+  // Show top relevant headline
+  getLiveNews().then(items => {
+    const top = items.find(n => n.ticker !== 'MARKET' || /fed|fomc|cpi|pce|rate|inflation|s&p|nasdaq/i.test(n.text));
+    const el = $('hmoHeadline');
+    if (el && top) el.innerHTML = `📰 <a href="${top.url}" target="_blank" rel="noopener">${top.text}</a> <span style="opacity:.6">· ${top.source}</span>`;
+  }).catch(() => {});
+}
+
 function updateMarketBadge() {
   // Market hours in ICT (UTC+7)
   // Regular: 21:30–04:00, Pre-market: 16:00–21:30, After-hours: 04:00–08:00
@@ -1623,6 +1742,9 @@ function renderHome() {
   }
   document.getElementById('homeHello').textContent = greeting;
   document.getElementById('homeSub').textContent = sub;
+
+  // Market overview
+  updateHomeMarketOv();
 
   // Sync balance card in holdings tab from main metrics
   const tvEl = document.getElementById('totalValue');
@@ -2215,7 +2337,7 @@ function rowHtml(p, value, weight, plUSD, plPct, livePrice, dayChgPct, marketOpe
 // ── Fetch live prices ─────────────────────────────────────────────────────────
 async function loadPrices() {
   renderSkeleton();
-  const tickers=PORTFOLIO.map(p=>p.ticker).join(',')+',SPY,QQQ,%5EGSPC,%5ENDX';
+  const tickers=PORTFOLIO.map(p=>p.ticker).join(',')+',SPY,QQQ,%5EGSPC,%5ENDX,%5EDJI,%5EVIX';
   const yfUrl=`https://query2.finance.yahoo.com/v8/finance/quote?symbols=${tickers}&fields=regularMarketPrice,regularMarketPreviousClose,regularMarketChangePercent,marketState`;
   const proxies=[
     `https://corsproxy.io/?url=${encodeURIComponent(yfUrl)}`,
@@ -2240,6 +2362,7 @@ async function loadPrices() {
     applyLivePrices(pm, isOpen);
     updateMarketBadge();
     $('liveBadge').style.display = isOpen ? 'inline-flex' : 'none';
+    if (document.getElementById('tab-home').classList.contains('active')) updateHomeMarketOv();
   } catch(e) {
     console.warn('Live prices unavailable:',e.message);
     const mb = $('marketBadge');
