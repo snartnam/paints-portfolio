@@ -16,15 +16,15 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <style>
     :root {
-      --bg:#FAF8F4; --surface:#F2EFE9; --card:#FFFDF9;
-      --text-primary:#1a1a2e; --text-secondary:#6b6b80; --border:rgba(0,0,0,0.06);
-      --purple-bg:#EEEDFE; --purple-dark:#3C3489; --purple-text:#534AB7;
-      --teal-bg:#E1F5EE;   --teal-dark:#085041;  --teal-text:#0F6E56;
-      --coral-bg:#FAECE7;  --coral-dark:#712B13; --coral-text:#993C1D;
-      --blue-bg:#E6F1FB;   --blue-dark:#0C447C;  --blue-text:#185FA5;
-      --green-bg:#EAF3DE;  --green-text:#27500A;
-      --amber-bg:#FAEEDA;  --amber-text:#633806;
-      --gray-bg:#F1EFE8;   --gray-text:#5F5E5A;
+      --bg:#F7F3EF; --surface:#EDE9E4; --card:#FFFCF9;
+      --text-primary:#111111; --text-secondary:#6b6b6b; --border:rgba(0,0,0,0.07);
+      --purple-bg:#EAE6FD; --purple-dark:#3C3489; --purple-text:#534AB7;
+      --teal-bg:#B7E1D1;   --teal-dark:#1a6b52;  --teal-text:#1a6b52;
+      --coral-bg:#FFB5C1;  --coral-dark:#8c1f35; --coral-text:#8c1f35;
+      --blue-bg:#A9D3FF;   --blue-dark:#1a4d80;  --blue-text:#1a4d80;
+      --green-bg:#FFE59A;  --green-text:#7a5800;
+      --amber-bg:#FFE59A;  --amber-text:#7a5800;
+      --gray-bg:#EDE9E4;   --gray-text:#5F5E5A;
       --up:#1D9E75; --down:#D85A30;
     }
     @media(prefers-color-scheme:dark){:root{
@@ -86,9 +86,9 @@
     .hdr-usersub{font-size:10px;color:var(--text-secondary);white-space:nowrap;}
     .market-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;padding:6px 12px;border-radius:20px;white-space:nowrap;border:none;cursor:default;letter-spacing:.01em;}
     .market-badge.closed{background:#FFE4E8;color:#C0392B;}
-    .market-badge.open{background:#D8F5E9;color:#0A6640;}
-    .market-badge.pre{background:#FFF3CD;color:#856404;}
-    .market-badge.after{background:#E8E0FF;color:#3C3489;}
+    .market-badge.open{background:#B7E1D1;color:#1a6b52;}
+    .market-badge.pre{background:#FFE59A;color:#7a5800;}
+    .market-badge.after{background:#EAE6FD;color:#3C3489;}
     .market-badge-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
     .market-badge.closed .market-badge-dot{background:#e74c3c;}
     .market-badge.open .market-badge-dot{background:#27ae60;animation:pulse 1.5s infinite;}
@@ -116,53 +116,53 @@
     /* Metric cards — pastel card style */
     .metric-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:1.5rem;}
     .mc{border-radius:20px;padding:18px 18px 16px;border:none;box-shadow:0 2px 12px rgba(0,0,0,.06);display:flex;flex-direction:column;}
-    .mc.mc-green {background:#D8F5E9;}
-    .mc.mc-blue  {background:#DDE8FD;}
-    .mc.mc-orange{background:#FDE8D8;}
-    .mc.mc-teal  {background:#D4F2EE;}
+    .mc.mc-green {background:#FFE59A;}
+    .mc.mc-blue  {background:#A9D3FF;}
+    .mc.mc-orange{background:#FFB5C1;}
+    .mc.mc-teal  {background:#B7E1D1;}
     .mc.mc-purple{background:#EAE6FD;}
     .mc-top-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
     .mc-titles{display:flex;flex-direction:column;gap:3px;}
     .mc-label{font-size:12px;font-weight:700;line-height:1.3;}
-    .mc.mc-green  .mc-label{color:#0A6640;}
-    .mc.mc-blue   .mc-label{color:#1A3F8C;}
-    .mc.mc-orange .mc-label{color:#8C3D10;}
-    .mc.mc-teal   .mc-label{color:#085041;}
+    .mc.mc-green  .mc-label{color:#7a5800;}
+    .mc.mc-blue   .mc-label{color:#1a4d80;}
+    .mc.mc-orange .mc-label{color:#8c1f35;}
+    .mc.mc-teal   .mc-label{color:#1a6b52;}
     .mc.mc-purple .mc-label{color:#3C3489;}
     .mc-desc{font-size:11px;font-weight:400;opacity:.7;}
-    .mc.mc-green  .mc-desc{color:#0A6640;}
-    .mc.mc-blue   .mc-desc{color:#1A3F8C;}
-    .mc.mc-orange .mc-desc{color:#8C3D10;}
-    .mc.mc-teal   .mc-desc{color:#085041;}
+    .mc.mc-green  .mc-desc{color:#7a5800;}
+    .mc.mc-blue   .mc-desc{color:#1a4d80;}
+    .mc.mc-orange .mc-desc{color:#8c1f35;}
+    .mc.mc-teal   .mc-desc{color:#1a6b52;}
     .mc.mc-purple .mc-desc{color:#3C3489;}
     .mc-icon{width:38px;height:38px;min-width:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .mc-icon svg{width:18px;height:18px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
-    .mc.mc-green  .mc-icon{background:rgba(10,102,64,.15);}
-    .mc.mc-green  .mc-icon svg{stroke:#0A6640;}
-    .mc.mc-blue   .mc-icon{background:rgba(26,63,140,.15);}
-    .mc.mc-blue   .mc-icon svg{stroke:#1A3F8C;}
-    .mc.mc-orange .mc-icon{background:rgba(140,61,16,.15);}
-    .mc.mc-orange .mc-icon svg{stroke:#8C3D10;}
-    .mc.mc-teal   .mc-icon{background:rgba(8,80,65,.15);}
-    .mc.mc-teal   .mc-icon svg{stroke:#085041;}
+    .mc.mc-green  .mc-icon{background:rgba(122,88,0,.18);}
+    .mc.mc-green  .mc-icon svg{stroke:#7a5800;}
+    .mc.mc-blue   .mc-icon{background:rgba(26,77,128,.18);}
+    .mc.mc-blue   .mc-icon svg{stroke:#1a4d80;}
+    .mc.mc-orange .mc-icon{background:rgba(140,31,53,.18);}
+    .mc.mc-orange .mc-icon svg{stroke:#8c1f35;}
+    .mc.mc-teal   .mc-icon{background:rgba(26,107,82,.18);}
+    .mc.mc-teal   .mc-icon svg{stroke:#1a6b52;}
     .mc.mc-purple .mc-icon{background:rgba(60,52,137,.15);}
     .mc.mc-purple .mc-icon svg{stroke:#3C3489;}
     .mc-bottom{margin-top:14px;}
     .mc-value{font-size:22px;font-weight:800;line-height:1.15;letter-spacing:-.02em;}
-    .mc.mc-green  .mc-value{color:#0A6640;}
-    .mc.mc-blue   .mc-value{color:#1A3F8C;}
-    .mc.mc-orange .mc-value{color:#8C3D10;}
-    .mc.mc-teal   .mc-value{color:#085041;}
+    .mc.mc-green  .mc-value{color:#7a5800;}
+    .mc.mc-blue   .mc-value{color:#1a4d80;}
+    .mc.mc-orange .mc-value{color:#8c1f35;}
+    .mc.mc-teal   .mc-value{color:#1a6b52;}
     .mc.mc-purple .mc-value{color:#3C3489;}
     .mc-value.up{} .mc-value.down{}
     .mc-change{display:inline-flex;align-items:center;gap:3px;margin-top:6px;font-size:12px;font-weight:600;opacity:.8;}
     .mc-change.up{color:#27ae60;}
     .mc-change.down{color:#e74c3c;}
     .mc-sub{font-size:11px;margin-top:3px;font-weight:400;opacity:.65;}
-    .mc.mc-green  .mc-sub{color:#0A6640;}
-    .mc.mc-blue   .mc-sub{color:#1A3F8C;}
-    .mc.mc-orange .mc-sub{color:#8C3D10;}
-    .mc.mc-teal   .mc-sub{color:#085041;}
+    .mc.mc-green  .mc-sub{color:#7a5800;}
+    .mc.mc-blue   .mc-sub{color:#1a4d80;}
+    .mc.mc-orange .mc-sub{color:#8c1f35;}
+    .mc.mc-teal   .mc-sub{color:#1a6b52;}
     .mc.mc-purple .mc-sub{color:#3C3489;}
     /* Index cards — now part of main metric grid */
     .index-row{display:none;}
@@ -356,9 +356,9 @@
     .rec-table tbody td:last-child{border-radius:0 12px 12px 0;font-size:12.5px;color:var(--text-secondary);}
     .rec-table tbody td.c{text-align:center;}
     .ticker-chip{background:var(--purple-bg);color:var(--purple-text);font-size:13px;font-weight:700;padding:4px 13px;border-radius:20px;white-space:nowrap;display:inline-block;}
-    .act-buy  {background:#C0DD97;color:#173404;border-radius:20px;padding:5px 16px;font-size:12px;font-weight:700;display:inline-block;white-space:nowrap;}
-    .act-hold {background:#FAC775;color:#412402;border-radius:20px;padding:5px 16px;font-size:12px;font-weight:700;display:inline-block;white-space:nowrap;}
-    .act-watch{background:#B5D4F4;color:#042C53;border-radius:20px;padding:5px 16px;font-size:12px;font-weight:700;display:inline-block;white-space:nowrap;}
+    .act-buy  {background:#B7E1D1;color:#1a6b52;border-radius:20px;padding:5px 16px;font-size:12px;font-weight:700;display:inline-block;white-space:nowrap;}
+    .act-hold {background:#FFE59A;color:#7a5800;border-radius:20px;padding:5px 16px;font-size:12px;font-weight:700;display:inline-block;white-space:nowrap;}
+    .act-watch{background:#A9D3FF;color:#1a4d80;border-radius:20px;padding:5px 16px;font-size:12px;font-weight:700;display:inline-block;white-space:nowrap;}
 
     .footer-card{margin-top:1.75rem;background:var(--purple-bg);border-radius:18px;padding:18px 20px;font-size:13.5px;color:var(--purple-text);line-height:1.8;}
     .footer-card strong{font-weight:700;}
@@ -567,9 +567,9 @@
     .home-actions{display:flex;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap;}
     .home-action-pill{display:flex;align-items:center;gap:7px;padding:10px 16px;border-radius:14px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s,transform .1s;flex:1;justify-content:center;}
     .home-action-pill:active{transform:scale(.97);}
-    .hap-portfolio{background:#DDE8FD;color:#1A3F8C;}
-    .hap-news{background:#FDE8D8;color:#8C3D10;}
-    .hap-recs{background:#D8F5E9;color:#0A6640;}
+    .hap-portfolio{background:#A9D3FF;color:#1a4d80;}
+    .hap-news{background:#FFB5C1;color:#8c1f35;}
+    .hap-recs{background:#B7E1D1;color:#1a6b52;}
 
     /* ── Passcode lock screen ── */
     #lockScreen{
@@ -645,23 +645,23 @@
     }
     .home-news-card:active{opacity:.8;transform:scale(.99);}
     .hnc-img{height:90px;display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;}
-    .home-news-card:nth-child(1) .hnc-img{background:#D8F5E9;}
-    .home-news-card:nth-child(2) .hnc-img{background:#DDE8FD;}
-    .home-news-card:nth-child(3) .hnc-img{background:#FDE8D8;}
-    .home-news-card:nth-child(4) .hnc-img{background:#EAE6FD;}
+    .home-news-card:nth-child(1) .hnc-img{background:#B7E1D1;}
+    .home-news-card:nth-child(2) .hnc-img{background:#A9D3FF;}
+    .home-news-card:nth-child(3) .hnc-img{background:#FFB5C1;}
+    .home-news-card:nth-child(4) .hnc-img{background:#FFE59A;}
     .hnc-body{padding:12px 14px 14px;flex:1;display:flex;flex-direction:column;}
     .hnc-ticker{display:inline-flex;align-items:center;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:8px;width:fit-content;}
-    .home-news-card:nth-child(1) .hnc-ticker{background:#D8F5E9;color:#0A6640;}
-    .home-news-card:nth-child(2) .hnc-ticker{background:#DDE8FD;color:#1A3F8C;}
-    .home-news-card:nth-child(3) .hnc-ticker{background:#FDE8D8;color:#8C3D10;}
-    .home-news-card:nth-child(4) .hnc-ticker{background:#EAE6FD;color:#3C3489;}
+    .home-news-card:nth-child(1) .hnc-ticker{background:#B7E1D1;color:#1a6b52;}
+    .home-news-card:nth-child(2) .hnc-ticker{background:#A9D3FF;color:#1a4d80;}
+    .home-news-card:nth-child(3) .hnc-ticker{background:#FFB5C1;color:#8c1f35;}
+    .home-news-card:nth-child(4) .hnc-ticker{background:#FFE59A;color:#7a5800;}
     .hnc-text{font-size:13px;font-weight:600;color:var(--text-primary);line-height:1.4;flex:1;}
     .hnc-source{font-size:11px;margin-top:8px;font-weight:500;color:var(--text-secondary);display:flex;align-items:center;gap:4px;}
     .hnc-source-dot{width:14px;height:14px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0;}
-    .home-news-card:nth-child(1) .hnc-source-dot{background:#0A6640;}
-    .home-news-card:nth-child(2) .hnc-source-dot{background:#1A3F8C;}
-    .home-news-card:nth-child(3) .hnc-source-dot{background:#8C3D10;}
-    .home-news-card:nth-child(4) .hnc-source-dot{background:#3C3489;}
+    .home-news-card:nth-child(1) .hnc-source-dot{background:#1a6b52;}
+    .home-news-card:nth-child(2) .hnc-source-dot{background:#1a4d80;}
+    .home-news-card:nth-child(3) .hnc-source-dot{background:#8c1f35;}
+    .home-news-card:nth-child(4) .hnc-source-dot{background:#7a5800;}
 
     /* Decorative blob */
     .home-deco{
@@ -796,23 +796,23 @@
       <!-- Quick nav pills -->
       <div class="home-quicknav">
         <button class="hqn-btn" onclick="showTab('overview')">
-          <span class="hqn-icon" style="background:#D8F5E9;"><svg viewBox="0 0 24 24" fill="none" stroke="#0A6640" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
+          <span class="hqn-icon" style="background:#FFE59A;"><svg viewBox="0 0 24 24" fill="none" stroke="#7a5800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
           Dashboard
         </button>
         <button class="hqn-btn" onclick="showTab('holdings')">
-          <span class="hqn-icon" style="background:#DDE8FD;"><svg viewBox="0 0 24 24" fill="none" stroke="#1A3F8C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 2v10l6.5 3.8"/></svg></span>
+          <span class="hqn-icon" style="background:#A9D3FF;"><svg viewBox="0 0 24 24" fill="none" stroke="#1a4d80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 2v10l6.5 3.8"/></svg></span>
           Portfolio
         </button>
         <button class="hqn-btn" onclick="showTab('news')">
-          <span class="hqn-icon" style="background:#FDE8D8;"><svg viewBox="0 0 24 24" fill="none" stroke="#8C3D10" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/><path d="M8 4V2"/><path d="M16 4V2"/><path d="M8 11h8"/><path d="M8 15h5"/></svg></span>
+          <span class="hqn-icon" style="background:#FFB5C1;"><svg viewBox="0 0 24 24" fill="none" stroke="#8c1f35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/><path d="M8 4V2"/><path d="M16 4V2"/><path d="M8 11h8"/><path d="M8 15h5"/></svg></span>
           News
         </button>
         <button class="hqn-btn" onclick="showTab('recs')">
-          <span class="hqn-icon" style="background:#FFF3CD;"><svg viewBox="0 0 24 24" fill="none" stroke="#856404" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6"/><path d="M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/></svg></span>
+          <span class="hqn-icon" style="background:#EAE6FD;"><svg viewBox="0 0 24 24" fill="none" stroke="#3C3489" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6"/><path d="M12 3a6 6 0 0 1 6 6c0 2.5-1.5 4.5-3 6H9c-1.5-1.5-3-3.5-3-6a6 6 0 0 1 6-6z"/></svg></span>
           Strategies
         </button>
         <button class="hqn-btn" onclick="showTab('tracker')">
-          <span class="hqn-icon" style="background:#D4F2EE;"><svg viewBox="0 0 24 24" fill="none" stroke="#085041" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg></span>
+          <span class="hqn-icon" style="background:#B7E1D1;"><svg viewBox="0 0 24 24" fill="none" stroke="#1a6b52" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg></span>
           Tracker
         </button>
       </div>
