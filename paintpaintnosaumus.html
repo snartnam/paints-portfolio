@@ -627,7 +627,9 @@
     @keyframes lockShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
     .lock-shake{animation:lockShake .35s ease;}
 
-    .home-news-title{font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:12px;}
+    .home-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .home-news-title{font-size:16px;font-weight:700;color:var(--text-primary);}
+    .home-viewall{background:none;border:none;font-size:13px;font-weight:600;color:#534AB7;cursor:pointer;font-family:inherit;padding:0;}
     .home-news-list{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 
     /* News cards — card style like inspiration */
@@ -804,7 +806,10 @@
         </button>
       </div>
 
-      <div class="home-news-title">Recent News</div>
+      <div class="home-section-head">
+        <div class="home-news-title">Recent News</div>
+        <button class="home-viewall" onclick="showTab('news')">View all</button>
+      </div>
       <div class="home-news-list" id="homeNewsList"></div>
     </div>
   </div>
